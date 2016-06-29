@@ -11,7 +11,8 @@
 #-----------------------------------------------------------------------
 export START_DATE=${ST_DATE:-2016062900}
 export FCST_RANGE=${FCST_RANGE:-8d}
-
+#print $START_DATE
+#print $FCST_RANGE
 export DATE=${DATE:-2016062900}
 export FCST_RANGE=${FCST_RANGE:-6}
 
@@ -39,7 +40,7 @@ export NL_START_SECOND=${NL_START_SECOND:-0}
 
 #export END_DATE=$($BUILD_DIR/da_advance_time.exe $DATE $FCST_RANGE 2>/dev/null)
 export END_DATE=$($BUILD_DIR/da_advance_time.exe $DATE $FCST_RANGE)
-
+#print $END_DATE
 export END_YEAR="$(echo $END_DATE | cut -c1-4)"
 export END_MONTH="$(echo $END_DATE | cut -c5-6)"
 export END_DAY="$(echo $END_DATE | cut -c7-8)"
