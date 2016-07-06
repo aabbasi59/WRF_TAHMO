@@ -49,14 +49,18 @@ let NL_INTERVAL_SECONDS=$LBC_FREQ*3600
 
 export NL_AUXINPUT1_INNAME="met_em.d<domain>.<date>"
 
-#if [[ $WRF_NAMELIST'.' != '.' ]]; then
-#   ln -fs $WRF_NAMELIST namelist.input
-#elif [[ -f $WRF_DIR/inc/namelist_script.inc ]]; then
-#   . $WRF_DIR/inc/namelist_script.inc
-#else
+
+if [[ $WRF_NAMELIST'.' != '.' ]]; then
+   ln -fs $WRF_NAMELIST namelist.input
+elif [[ -f $WRF_DIR/inc/namelist_script.inc ]]; then
+   . $WRF_DIR/inc/namelist_script.inc
+else
 #   ln -fs $WRF_DIR/test/em_real/namelist.input .
-#fi
-cp $SCRIPTS_DIR/namelist.input .
+   echo "Problem with namelist.input"
+   exit 1
+fi
+#cp $SCRIPTS_DIR/namelist.input .
+
 
 cp namelist.input $RUN_DIR
 
@@ -95,7 +99,7 @@ else
          echo "<H1>$FILE</H1><PRE>" >> $FILE.html
          cat $FILE >> $FILE.html
          echo "</PRE></BODY></HTML>" >> $FILE.html
-         rm $FILE
+ #        rm $FILE
       done
       echo '<A HREF="rsl/rsl.out.0000.html">rsl.out.0000</a>'
       echo '<A HREF="rsl/rsl.error.0000.html">rsl.error.0000</a>'
@@ -109,6 +113,9 @@ fi
 for DOMAIN in $DOMAINS; do
    if [[ -f $WORK_DIR/wrfinput_d${DOMAIN} ]]; then
       mv $WORK_DIR/wrfinput_d${DOMAIN}* $REAL_OUTPUT_DIR/$DATE
+      if [[ $USE_SST = 1 ]]; then
+         mv $WORK_DIR/wrflowinp_d${DOMAIN}* $REAL_OUTPUT_DIR/$DATE
+      fi
       this_date_wrf=$($BUILD_DIR/da_advance_time.exe $DATE 0 -W 2>/dev/null)
       (cd $REAL_OUTPUT_DIR/$DATE; ln -sf wrfinput_d${DOMAIN} wrfinput_d${DOMAIN}.$this_date_wrf)
    fi

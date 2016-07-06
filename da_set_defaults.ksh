@@ -166,14 +166,14 @@ export RUN_UNGRIB_METGRID_KMA=${RUN_UNGRIB_METGRID_KMA:-false}
 export OPT_GEOGRID_TBL_PATH=${OPT_GEOGRID_TBL_PATH:-$WPS_DIR/geogrid}
 export OPT_METGRID_TBL_PATH=${OPT_METGRID_TBL_PATH:-$WPS_DIR/metgrid}
 export WPS_GEOG_DIR=${WPS_GEOG_DIR:-$REL_DIR/WPS_GEOG} 
-export MAX_DOMAINS=${MAX_DOMAINS:-1}
+export NL_MAX_DOM=${NL_MAX_DOM:-1}
 export NL_E_WE=${NL_E_WE:-45}
 export NL_E_SN=${NL_E_SN:-45}
-export NL_E_VERT=${NL_E_VERT:-30}
-export PARENT_ID=${PARENT_ID:-1}
-export PARENT_GRID_RATIO=${PARENT_GRID_RATIO:-1}
-export I_PARENT_START=${I_PARENT_START:-1}
-export J_PARENT_START=${J_PARENT_START:-1}
+#export NL_E_VERT=${NL_E_VERT:-30}
+export NL_PARENT_ID=${NL_PARENT_ID:-1}
+export NL_PARENT_GRID_RATIO=${NL_PARENT_GRID_RATIO:-1}
+export NL_I_PARENT_START=${NL_I_PARENT_START:-1}
+export NL_J_PARENT_START=${NL_J_PARENT_START:-1}
 export MAP_PROJ=${MAP_PROJ:-lambert}
 export REF_LAT=${REF_LAT:-40.0}
 export REF_LON=${REF_LON:--98.0}
@@ -190,32 +190,32 @@ export CONSTANTS2=${CONSTANTS2:-*}
 export NL_DEBUG_LEVEL=${NL_DEBUG_LEVEL:-0}
 
 # WRF real (not already covered above):
-export NL_NUM_METGRID_LEVELS=${NL_NUM_METGRID_LEVELS:-27}
+#export NL_NUM_METGRID_LEVELS=${NL_NUM_METGRID_LEVELS:-27}
 export NL_P_TOP_REQUESTED=${NL_P_TOP_REQUESTED:-5000}
 export NL_FRAMES_PER_OUTFILE=${NL_FRAMES_PER_OUTFILE:-1}
-export NL_HISTORY_INTERVAL=${NL_HISTORY_INTERVAL:-720}          # (minutes)
+export NL_HISTORY_INTERVAL=${NL_HISTORY_INTERVAL:-60}          # (minutes)
 export NL_TIME_STEP=${NL_TIME_STEP:-360}                # Timestep (s) (dt=4-6*dx(km) recommended).
-export NL_ETA_LEVELS=${NL_ETA_LEVELS:-" 1.000, 0.990, 0.978, 0.964, 0.946, "\
-                                      " 0.922, 0.894, 0.860, 0.817, 0.766, "\
-                                      " 0.707, 0.644, 0.576, 0.507, 0.444, 0.380,"\
-                                      " 0.324, 0.273, 0.228, 0.188, 0.152,"\
-                                      " 0.121, 0.093, 0.069, 0.048, 0.029, 0.014, 0.000"}
+#export NL_ETA_LEVELS=${NL_ETA_LEVELS:-" 1.000, 0.990, 0.978, 0.964, 0.946, "\
+#                                      " 0.922, 0.894, 0.860, 0.817, 0.766, "\
+#                                      " 0.707, 0.644, 0.576, 0.507, 0.444, 0.380,"\
+#                                      " 0.324, 0.273, 0.228, 0.188, 0.152,"\
+#                                      " 0.121, 0.093, 0.069, 0.048, 0.029, 0.014, 0.000"}
 export NL_E_VERT=${NL_E_VERT:-28}                   #
-export NL_SMOOTH_OPTION=${NL_SMOOTH_OPTION:-1}           # ?
-export NL_MP_PHYSICS=${NL_MP_PHYSICS:-3}           #
-export NL_RADT=$(( NL_DX/1000 )) # 1 minute per km of dx
-export NL_SF_SFCLAY_PHYSICS=${NL_SF_SFCLAY_PHYSICS:-1}
-export NL_SF_SURFACE_PHYSICS=${NL_SF_SURFACE_PHYSICS:-1} #(1=Thermal diffusion, 2=Noah LSM).
+export NL_SMOOTH_OPTION=${NL_SMOOTH_OPTION:-2}           # ?
+export NL_MP_PHYSICS=${NL_MP_PHYSICS:-0}           #
+export NL_RADT=$(( `echo $NL_DX | cut -d"," -f1`/1000 )) #$(( NL_DX/1000 )) # 1 minute per km of dx
+export NL_SF_SFCLAY_PHYSICS=${NL_SF_SFCLAY_PHYSICS:-0}
+export NL_SF_SURFACE_PHYSICS=${NL_SF_SURFACE_PHYSICS:-0} #(1=Thermal diffusion, 2=Noah LSM).
 export NL_NUM_SOIL_LAYERS=${NL_NUM_SOIL_LAYERS:-5}
-export NL_BL_PBL_PHYSICS=${NL_BL_PBL_PHYSICS:-1} #(1=Thermal diffusion, 2=Noah LSM).
-export NL_CU_PHYSICS=${NL_CU_PHYSICS:-1}           #(1=, 2=,3=).
+export NL_BL_PBL_PHYSICS=${NL_BL_PBL_PHYSICS:-0} #(1=Thermal diffusion, 2=Noah LSM).
+export NL_CU_PHYSICS=${NL_CU_PHYSICS:-0}           #(1=, 2=,3=).
 export NL_CUDT=${NL_CUDT:-5}           #(1=, 2=,3=).
 export NL_W_DAMPING=${NL_W_DAMPING:-0}            #
-export NL_DIFF_OPT=${NL_DIFF_OPT:-0}             #
+export NL_DIFF_OPT=${NL_DIFF_OPT:-1}             #
 export NL_KM_OPT=${NL_KM_OPT:-1}               #
 export NL_BASE_TEMP=${NL_BASE_TEMP:-290.0}               #
 export NL_DAMPCOEF=${NL_DAMPCOEF:-0.2}
-export NL_TIME_STEP_SOUND=${NL_TIME_STEP_SOUND:-6}    #
+#export NL_TIME_STEP_SOUND=${NL_TIME_STEP_SOUND:-6}    #
 export NL_SPECIFIED=${NL_SPECIFIED:-true}          #
 
 # WRF (not already covered above):
@@ -226,9 +226,9 @@ export NL_INPUTOUT_INTERVAL=${NL_INPUTOUT_INTERVAL:-360}
 export NL_INPUTOUT_BEGIN_H=${NL_INPUTOUT_BEGIN_H:-$CYCLE_PERIOD} # Output input format start.
 export NL_INPUTOUT_END_H=${NL_INPUTOUT_END_H:-$FCST_RANGE}       # Output input format end.
 export NL_TIME_STEP=${NL_TIME_STEP:-360}                # Timestep (s) (dt=4-6*dx(km) recommended).
-export NL_RA_LW_PHYSICS=${NL_RA_LW_PHYSICS:-1}
-export NL_RA_SW_PHYSICS=${NL_RA_SW_PHYSICS:-1}
-export NL_MP_ZERO_OUT=${NL_MP_ZERO_OUT:-2}
+export NL_RA_LW_PHYSICS=${NL_RA_LW_PHYSICS:-0}
+export NL_RA_SW_PHYSICS=${NL_RA_SW_PHYSICS:-0}
+export NL_MP_ZERO_OUT=${NL_MP_ZERO_OUT:-0}
 
 # OBSPROC (not covered above):
 export MAX_OB_RANGE=${MAX_OB_RANGE:-2}             # Maximum difference O, B (hours)
@@ -326,8 +326,8 @@ export ADJ_REF=${ADJ_REF:-2}              # Reference analysis: 1: 3DVAR analysi
 export ADJ_MEASURE=${ADJ_MEASURE:-4}      # 1. first order, 2. second order, 3. third order, 4. variant of third order
 export NL_ADJ_SENS=${NL_ADJ_SENS:-false}
 export ADJ_ISTART=${ADJ_ISTART:-1}
-export ADJ_IEND=${ADJ_IEND:-$((NL_E_WE-1))}
+export ADJ_IEND=${ADJ_IEND:-$((`echo $NL_E_WE | cut -d"," -f1`-1))} #${ADJ_IEND:-$((NL_E_WE-1))}
 export ADJ_JSTART=${ADJ_JSTART:-1}
-export ADJ_JEND=${ADJ_JEND:-$((NL_E_SN-1))}
+export ADJ_JEND=${ADJ_JEND:-$((`echo $NL_E_SN | cut -d"," -f1`-1))} #${ADJ_JEND:-$((NL_E_SN-1))}
 export ADJ_KSTART=${ADJ_KSTART:-1}
-export ADJ_KEND=${ADJ_KEND:-$((NL_E_VERT-1))}
+export ADJ_KEND=${ADJ_KEND:-$((`echo $NL_E_VERT | cut -d"," -f1`-1))} #${ADJ_KEND:-$((NL_E_VERT-1))}
