@@ -36,7 +36,6 @@ echo 'WORK_DIR       <A HREF="file:'$WORK_DIR'"</a>'$WORK_DIR'</a>'
 
 
 $SCRIPTS_DIR/da_create_wps_namelist.ksh
-#cp $SCRIPTS_DIR/namelist3.wps $WORK_DIR/namelist.wps
 cp $WORK_DIR/namelist.wps $RUN_DIR
 
 echo '<A HREF="namelist.wps">namelist.wps</a>'
@@ -45,6 +44,8 @@ echo '<A HREF="namelist.wps">namelist.wps</a>'
 # [3.0] Run WPS:
 #-----------------------------------------------------------------------
 
+   # Run geogrid:
+   
 if $DUMMY; then
    echo "Dummy wps"
    LOCAL_DATE=$DATE
