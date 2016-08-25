@@ -2,7 +2,7 @@
 #########################################################################
 # Script: da_run_wrfvar.ksh
 #
-# Purpose: Run wrfvar
+# Purpose: Run wrfda-3DVar
 #########################################################################
 
 export REL_DIR=${REL_DIR:-$HOME/Build_WRF}
@@ -75,9 +75,9 @@ date
 
 echo 'REL_DIR               <A HREF="file:'$REL_DIR'">'$REL_DIR'</a>'
 echo 'WRFVAR_DIR            <A HREF="file:'$WRFVAR_DIR'">'$WRFVAR_DIR'</a>' $WRFVAR_VN
-if $NL_VAR4D; then
-   echo 'WRFPLUS_DIR           <A HREF="file:'$WRFPLUS_DIR'">'$WRFPLUS_DIR'</a>' $WRFPLUS_VN
-fi
+#if $NL_VAR4D; then
+#   echo 'WRFPLUS_DIR           <A HREF="file:'$WRFPLUS_DIR'">'$WRFPLUS_DIR'</a>' $WRFPLUS_VN
+#fi
 echo "DA_BACK_ERRORS        $DA_BACK_ERRORS"
 
 if [[ $USE_RADIANCE_OBS = 1 ]]; then
@@ -118,14 +118,6 @@ cd $WORK_DIR
 START_DATE=$($BUILD_DIR/da_advance_time.exe $DATE $WINDOW_START)
 END_DATE=$($BUILD_DIR/da_advance_time.exe $DATE $WINDOW_END)
 
-#for INDEX in 01 02 03 04 05 06 07; do
-#   let H=$INDEX-1+$WINDOW_START
-#   D_DATE[$INDEX]=$($BUILD_DIR/da_advance_time.exe $DATE $H)
-#   export D_YEAR[$INDEX]=$(echo ${D_DATE[$INDEX]} | cut -c1-4)
-#   export D_MONTH[$INDEX]=$(echo ${D_DATE[$INDEX]} | cut -c5-6)
-#   export D_DAY[$INDEX]=$(echo ${D_DATE[$INDEX]} | cut -c7-8)
-#   export D_HOUR[$INDEX]=$(echo ${D_DATE[$INDEX]} | cut -c9-10)
-#done
 
 export YEAR=$(echo $DATE | cut -c1-4)
 export MONTH=$(echo $DATE | cut -c5-6)
@@ -212,6 +204,8 @@ ln -fs $BUILD_DIR/da_wrfvar.exe .
 #export PATH=$WRFVAR_DIR/var/scripts:$PATH
 
 cp -p $DA_FIRST_GUESS fg 
+
+# if cycling then update low boundary before running WRFDA
 if $CYCLING; then
    if [[ $CYCLE_NUMBER -gt 0 ]]; then
      ${SCRIPTS_DIR}/update_low_bc.ksh
@@ -229,40 +223,8 @@ fi
   ln -fs $DA_BACK_ERRORS be.dat
 #fi
 
-#if [[ -d $EP_DIR ]]; then
-#   ln -fs $EP_DIR ep
-#fi
 
-#if [[ -d $BIASCORR_DIR ]]; then
-#   ln -fs $BIASCORR_DIR biascorr
-#fi
 
-#if [[ -d $OBS_TUNING_DIR ]]; then
-#   ln -fs $OBS_TUNING_DIR/* .
-#fi
-
-#if [[ $NL_NUM_FGAT_TIME -gt 1 ]]; then
-#      typeset -i N
-#      let N=0
-#      FGAT_DATE=$START_DATE
-#      until [[ $FGAT_DATE > $END_DATE ]]; do
-#         let N=$N+1
-#         ln -fs $OB_DIR/$FGAT_DATE/ob.ascii ob0${N}.ascii
-#         if [[ -s $OB_DIR/$FGAT_DATE/ob.ssmi ]]; then
-#            ln -fs $OB_DIR/$FGAT_DATE/ob.ssmi ob0${N}.ssmi
-#         fi
-#         if [[ -s $OB_DIR/$FGAT_DATE/ob.radar ]]; then
-#            ln -fs $OB_DIR/$FGAT_DATE/ob.radar ob0${N}.radar
-#         fi
-#         FYEAR=$(echo ${FGAT_DATE} | cut -c1-4)
-#         FMONTH=$(echo ${FGAT_DATE} | cut -c5-6)
-#         FDAY=$(echo ${FGAT_DATE} | cut -c7-8)
-#         FHOUR=$(echo ${FGAT_DATE} | cut -c9-10)
-#         ln -fs ${FC_DIR}/${PREV_DATE}/wrfinput_d01_${FYEAR}-${FMONTH}-${FDAY}_${FHOUR}:00:00 fg0${N}
-#         FGAT_DATE=$($BUILD_DIR/da_advance_time.exe $FGAT_DATE $FGATOBS_FREQ)
-#      done
-#
-#else
 #   ln -fs $OB_DIR/${DATE}/ob.ascii  ob.ascii
    if [[ -s $OB_DIR/${DATE}/ob.ssmi ]]; then
       ln -fs $OB_DIR/${DATE}/ob.ssmi ob.ssmi
@@ -270,7 +232,7 @@ fi
    if [[ -s $OB_DIR/${DATE}/ob.radar ]]; then
       ln -fs $OB_DIR/${DATE}/ob.radar ob.radar
    fi
-#fi
+
 
 #for FILE in $OB_DIR/$DATE/*.bufr; do
 #   if [[ -f $FILE ]]; then
@@ -319,7 +281,7 @@ else
       RC=$?
 #   fi
 
-
+# if cycling then update lateral boundary
 if $CYCLING; then
    if [[ ${DOMAIN} == '01' ]]; then
      ${SCRIPTS_DIR}/update_lat_bc.ksh
@@ -393,16 +355,16 @@ fi
    if [[ -f rsl.out.0000 ]]; then
       cp rsl.out.0000 $RUN_DIR
    fi
-#   if [[ -f VARBC.in ]]; then
-#      cp VARBC.in $RUN_DIR
-#   fi
-#   if [[ -f VARBC.out ]]; then
-#      cp VARBC.out $RUN_DIR
-#   fi
-#   if (ls biasprep* 2>/dev/null); then
-#      mkdir $RUN_DIR/biasprep
-#      mv $RUN_DIR/working/biasprep* $RUN_DIR/biasprep
-#   fi
+   if [[ -f VARBC.in ]]; then
+      cp VARBC.in $RUN_DIR
+   fi
+   if [[ -f VARBC.out ]]; then
+      cp VARBC.out $RUN_DIR
+   fi
+   if (ls biasprep* 2>/dev/null); then
+      mkdir $RUN_DIR/biasprep
+      mv $RUN_DIR/working/biasprep* $RUN_DIR/biasprep
+   fi
 
 
 
@@ -422,8 +384,8 @@ fi
    rm -f qcstat_*.*
 #   rm filtered_obs.*
    # No routine to merge these files across processors yet
-   # rm -f inv_*.*
-   # rm -f oma_*.*
+    rm -f inv_*.*
+    rm -f oma_*.*
    # rm -f filtered_*.*
 
 #   if [[ $NL_MULTI_INC == 0 ]] ; then
