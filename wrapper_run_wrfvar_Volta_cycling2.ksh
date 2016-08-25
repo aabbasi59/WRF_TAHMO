@@ -3,7 +3,8 @@
 # Script: wrapper_run_wrfvar_Volta_cycling.ksh
 #
 # Purpose: Wrapper for cycling with WRF and WRFDA 
-#
+# It runs WPS, real and then WRFDA and WRF in cycling mode
+# It calls the scripts: da_run_wps, da_run_real, run_wrf and run_wrfvar2
 # 
 #########################################################################
 
@@ -174,6 +175,7 @@ fi
 #######################################################################################
 mkdir -p $EXP_DIR
 
+# Creation of lists of variable for WRF and for WRFDA
 
 if [[ -f ${EXP_DIR}/namelist_wrf.ksh ]]; then
 echo 1
