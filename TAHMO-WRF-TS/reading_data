@@ -1,0 +1,3 @@
+Reading TAHMO Data for different stations and WRF TS list output data
+The input folders/files should be generated according to the TAHMO standard
+The WRF_LIST data should be prepared by NCL code to generate csv files to be used in this code.
