@@ -1,3 +1,4 @@
-Reading TAHMO Data for different stations and WRF TS list output data
-The input folders/files should be generated according to the TAHMO standard
+Reading TAHMO Data for different stations. TAHMO data should be downoaded by running a Python Script.
+WRF TS list output data is used for defined stations in ts_list in WRF directory.
+The input folders/files should be generated according to the TAHMO standard.
 The WRF_LIST data should be prepared by NCL code to generate csv files to be used in this code.
