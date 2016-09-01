@@ -1,4 +1,5 @@
 ; Script to read time series of WRF and write them in a csv file
+;The output of this NCl code will be read  by Python Code
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
