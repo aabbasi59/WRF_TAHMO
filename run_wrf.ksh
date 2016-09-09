@@ -39,8 +39,41 @@ export NL_INPUTOUT_END_H=${NL_INPUTOUT_END_H:-$FCST_RANGE}
 export NL_INPUTOUT_INTERVAL=60,60,60
 
 #----- WRF -----
-export EXEC_DIR=$WRF_DIR
-export EXEC_FILE="wrf.exe"   
+#if [[ $WRF_CONF == "" ]]; then
+   export EXEC_DIR=$WRF_DIR
+   export EXEC_FILE="wrf.exe"   
+#else
+#   let NL_HISTORY_INTERVAL=$FCST_RANGE*60
+#   
+#   let TIME_STEP_MINUTE=$NL_TIME_STEP/60
+#   if [[ -f $WORK_DIR/namelist.input ]];  then rm -rf $WORK_DIR/namelist.input;  fi
+#   if [[ -f $WORK_DIR/namelist.output ]]; then rm -rf $WORK_DIR/namelist.output; fi
+#  
+#----- WRFNL -----
+#   if   [[ $WRF_CONF == "NL" ]]; then
+#      
+#      export EXEC_DIR=$WRFNL_DIR
+#      export EXEC_FILE="wrf.exe"
+#      export NL_DYN_OPT=2
+#      ln -fs $EXEC_DIR/run/RRTM_DATA RRTM_DATA
+#      ln -fs $EXEC_DIR/run/ETAMPNEW_DATA ETAMPNEW_DATA
+#      export NL_WRITE_INPUT=false
+#      echo 
+#      if  [[  $NL_TRAJECTORY_IO != "true" ]]; then
+#         export NL_AUXHIST6_OUTNAME="./auxhist6_d<domain>_<date>"
+#         export NL_AUXHIST6_BEGIN_H=0
+#         export NL_AUXHIST6_END_H=$FCST_RANGE
+#         export NL_AUXHIST6_INTERVAL=$TIME_STEP_MINUTE
+#         export NL_IO_FORM_AUXHIST6=2
+#         export NL_FRAMES_PER_AUXHIST6=1
+#         export NL_IOFIELDS_FILENAME="${WRFVAR_DIR}/var/run/plus.io_config"
+#         export NL_IGNORE_IOFIELDS_WARNING=true
+#      fi
+#
+#      unset NL_INPUT_OUTNAME
+#  
+#   fi
+#fi
 
 
 # Get extra namelist variables:
@@ -65,11 +98,10 @@ echo "LBC_FREQ       $LBC_FREQ"
 echo "DOMAINS        $DOMAINS"
 echo "MEM            $MEM"
 
-
 # Copy necessary info (better than link as not overwritten):
 ln -fs $EXEC_DIR/main/$EXEC_FILE .
 #ln -fs $EXEC_DIR/run/gribmap.txt .	#????????????
-#ln -fs $EXEC_DIR/run/ozone* .
+ln -fs $EXEC_DIR/run/ozone* .
 ln -fs $EXEC_DIR/run/*.TBL .
 if $DOUBLE; then
    ln -fs $EXEC_DIR/run/RRTM_DATA_DBL RRTM_DATA
@@ -86,7 +118,9 @@ for DOMAIN in $DOMAINS; do
    # not create a recursive link
    cp $WRF_INPUT_DIR/$DATE/wrfinput_d${DOMAIN} wrfinput_d${DOMAIN}
    # WHY
+   # cp ${RC_DIR}/$DATE/wrflowinp_d${DOMAIN} wrflowinp_d${DOMAIN}
    if [[ $USE_SST = 1 ]]; then
+#      cp $WRF_INPUT_DIR/$DATE/wrflowinp_d${DOMAIN} wrflowinp_d${DOMAIN}
       cp ${RC_DIR}/$INITIAL_DATE/wrflowinp_d${DOMAIN} wrflowinp_d${DOMAIN}
    fi
 done
@@ -95,12 +129,39 @@ cp $WRF_INPUT_DIR/$DATE/wrfbdy_d01* .
 let NL_INTERVAL_SECONDS=$LBC_FREQ*3600
 
 # Create namelist.input
+#unset NL_RUN_HOURS
+#if [[ $WRF_NAMELIST'.' != '.' ]]; then
+#   ln -fs $WRF_NAMELIST namelist.input
+#elif [[ -f $EXEC_DIR/inc/namelist_script.inc ]]; then
    . $EXEC_DIR/inc/namelist_script.inc "namelist.input"
+#else
+#   ln -fs $EXEC_DIR/test/em_real/namelist.input .
+#fi
+
+if [[ $USE_TSLIST = 1 ]];then
+   ln -fs ${SCRIPTS_DIR}/tslist .
+fi
 
 cp namelist.input $RUN_DIR/namelist.input
+cp namelist.input $RUN_DIR/namelist.input$WRF_CONF
 echo '<A HREF="namelist.input">Namelist input</a>'
 
-# Run wrf
+#if $DUMMY; then
+#   echo Dummy wrf
+#   LOCAL_DATE=$DATE
+#   while [[ $LOCAL_DATE -le $END_DATE ]]; do
+#      export L_YEAR=$(echo $LOCAL_DATE | cut -c1-4)
+#      export L_MONTH=$(echo $LOCAL_DATE | cut -c5-6)
+#      export L_DAY=$(echo $LOCAL_DATE | cut -c7-8)
+#      export L_HOUR=$(echo $LOCAL_DATE | cut -c9-10)
+#      for DOMAIN in $DOMAINS; do
+#         echo Dummy wrf > wrfout_d${DOMAIN}_${L_YEAR}-${L_MONTH}-${L_DAY}_${L_HOUR}:00:00
+#         echo Dummy wrf > wrfinput_d${DOMAIN}_${L_YEAR}-${L_MONTH}-${L_DAY}_${L_HOUR}:00:00
+#      done
+#      LOCAL_DATE=$($BUILD_DIR/da_advance_time.exe $LOCAL_DATE $NL_HISTORY_INTERVAL)
+#   done
+#else
+
    $RUN_CMD ./$EXEC_FILE
 
    if [[ -f rsl.out.0000 ]]; then
@@ -108,15 +169,15 @@ echo '<A HREF="namelist.input">Namelist input</a>'
       RC=$?
    fi
    
-# Copy different output files   
    cp namelist.output $RUN_DIR/namelist.output
+#   cp namelist.output $RUN_DIR/namelist.output$WRF_CONF
    echo '<A HREF="namelist.output">Namelist output</a>'
 
    if [[ -f rsl.out.0000 ]]; then
-      rm -rf $RUN_DIR/rsl 
-      mkdir -p $RUN_DIR/rsl 
-      mv rsl* $RUN_DIR/rsl 
-      cd $RUN_DIR/rsl 
+#      rm -rf $RUN_DIR/rsl #_$WRF_CONF
+      mkdir -p $FC_DIR_DATE/rsl #_$WRF_CONF
+      mv rsl* $FC_DIR_DATE/rsl #_$WRF_CONF
+      cd $FC_DIR_DATE/rsl #_$WRF_CONF
       for FILE in rsl*; do
          echo "<HTML><HEAD><TITLE>$FILE</TITLE></HEAD>" > $FILE.html
          echo "<H1>$FILE</H1><PRE>" >> $FILE.html
@@ -136,6 +197,16 @@ if [[ $WRF_CONF == "" ]]; then
    mv $WORK_DIR/wrfinput_* $FC_DIR_DATE
    mv $WORK_DIR/wrfout_*   $FC_DIR_DATE
    mv $WORK_DIR/wrfvar_input_* $FC_DIR_DATE
+   mv $WORK_DIR/namelist.output $FC_DIR_DATE
+fi
+if [[ $USE_TSLIST = 1 ]];then
+   mkdir -p $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.PH $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.QV $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.TH $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.TS $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.UU $FC_DIR_DATE/tslist
+   mv $WORK_DIR/*.VV $FC_DIR_DATE/tslist
 fi
 
 if $CLEAN; then
